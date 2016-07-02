@@ -14,10 +14,10 @@ You will need to sign up to the Cognitive Services API via Azure and obtain a su
 
 Once you have your subscription key, construct a new Cognitive Services client and then use the client to access the various services on the Cognitive Services API.
 
-```
+```go
 client := cognitiveservices.NewClient("your-subscription-key")
 results, err := client.WebSearch("cats", 10, 0, "GB-en", "Moderate")
 ```
 
 ## License
-MIT
+[MIT](https://github.com/avivian/go-azure-cognitive-services/blob/master/LICENSE)
