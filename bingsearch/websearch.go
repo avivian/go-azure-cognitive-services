@@ -1,4 +1,4 @@
-package cognitiveservices
+package bingsearch
 
 import (
 	"encoding/json"
@@ -195,7 +195,7 @@ func getResponseError(res *http.Response) error {
 	return webSearchError
 }
 
-func (cs *CognitiveServicesClient) WebSearch(query string, count int, offset int, mkt string, safesearch string) (*BingSearchResult, error) {
+func (bsc *BingSearchClient) WebSearch(query string, count int, offset int, mkt string, safesearch string) (*BingSearchResult, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", bingSearchUrl, nil)
 	if err != nil {
@@ -209,7 +209,7 @@ func (cs *CognitiveServicesClient) WebSearch(query string, count int, offset int
 	params.Add("safesearch", safesearch)
 	req.URL.RawQuery = params.Encode()
 
-	req.Header.Add("Ocp-Apim-Subscription-Key", cs.SubscriptionKey)
+	req.Header.Add("Ocp-Apim-Subscription-Key", bsc.SubscriptionKey)
 
 	res, err := client.Do(req)
 	if err != nil {
