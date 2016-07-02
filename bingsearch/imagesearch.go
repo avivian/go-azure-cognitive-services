@@ -3,18 +3,18 @@ package bingsearch
 var bingImageSearchURL = "https://api.cognitive.microsoft.com/bing/v5.0/images/search"
 
 type BingImageSearchResult struct {
-	Type                         string                            `json:"_type"`
-	Instrumentation              BingInstrumentation               `json:"instrumentation"`
-	ReadLink                     string                            `json:"readLink"`
-	WebSearchUrl                 string                            `json:"webSearchUrl"`
-	WebSearchUrlPingSuffix       string                            `json:"webSearchUrlPingSuffix"`
-	TotalEstimatedMatches        int                               `json:"totalEstimatedMatches"`
-	Value                        []ImageSearchValue                `json:"value"`
-	QueryExpansions              []QueryExpansions                 `json:"queryExpansions"`
-	NextOffsetAddCount           int                               `json:"nextOffsetAddCount"`
-	PivotSuggestions             []ImageSearchPivotSuggestionsList `json:"pivotSuggestions"`
-	DisplayShoppingSourcesBadges bool                              `json:"displayShoppingSourcesBadges"`
-	DisplayRecipeSourcesBadges   bool                              `json:"displayRecipeSourcesBadges"`
+	Type                         string                 `json:"_type"`
+	Instrumentation              BingInstrumentation    `json:"instrumentation"`
+	ReadLink                     string                 `json:"readLink"`
+	WebSearchUrl                 string                 `json:"webSearchUrl"`
+	WebSearchUrlPingSuffix       string                 `json:"webSearchUrlPingSuffix"`
+	TotalEstimatedMatches        int                    `json:"totalEstimatedMatches"`
+	Value                        []ImageSearchValue     `json:"value"`
+	QueryExpansions              []QueryExpansions      `json:"queryExpansions"`
+	NextOffsetAddCount           int                    `json:"nextOffsetAddCount"`
+	PivotSuggestions             []PivotSuggestionsList `json:"pivotSuggestions"`
+	DisplayShoppingSourcesBadges bool                   `json:"displayShoppingSourcesBadges"`
+	DisplayRecipeSourcesBadges   bool                   `json:"displayRecipeSourcesBadges"`
 }
 
 type ImageSearchValue struct {
@@ -31,7 +31,7 @@ type ImageSearchValue struct {
 	HostPageDisplayUrl     string                                 `json:"hostPageDisplayUrl"`
 	Width                  int                                    `json:"width"`
 	Height                 int                                    `json:"height"`
-	Thumbnail              ImageSearchValueThumbnail              `json:"thumbnail"`
+	Thumbnail              ImageThumbnail                         `json:"thumbnail"`
 	ImageInsightsToken     string                                 `json:"imageInsightsToken"`
 	InsightsSourcesSummary ImageSearchValueInsightsSourcesSummary `json:"insightsSourcesSummary"`
 	ImageId                string                                 `json:"imageId"`
@@ -46,7 +46,7 @@ type QueryExpansions struct {
 	Thumbnail              ImageSearchThumbnail `json:"thumbnail"`
 }
 
-type ImageSearchValueThumbnail struct {
+type ImageThumbnail struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
 }
@@ -56,12 +56,12 @@ type ImageSearchValueInsightsSourcesSummary struct {
 	RecipeSourcesCount   int `json:"recipeSourcesCount"`
 }
 
-type ImageSearchPivotSuggestionsList struct {
-	Pivot       string                        `json:"pivot"`
-	Suggestions []ImageSearchPivotSuggestions `json:"suggestions"`
+type PivotSuggestionsList struct {
+	Pivot       string             `json:"pivot"`
+	Suggestions []PivotSuggestions `json:"suggestions"`
 }
 
-type ImageSearchPivotSuggestions struct {
+type PivotSuggestions struct {
 	Text                   string               `json:"text"`
 	DisplayText            string               `json:"displayText"`
 	WebSearchUrl           string               `json:"webSearchUrl"`
