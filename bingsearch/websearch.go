@@ -1,25 +1,18 @@
 package bingsearch
 
-import (
-	"encoding/json"
-	"log"
-	"net/http"
-	"strconv"
-)
-
 var bingSearchUrl = "https://api.cognitive.microsoft.com/bing/v5.0/search"
 
 type BingSearchResult struct {
-	Type            string                          `json:"_type"`
-	Instrumentation BingSearchResultInstrumentation `json:"instrumentation"`
-	WebPages        WebpageResult                   `json:"webPages"`
-	Images          ImageResult                     `json:"images"`
-	News            NewsResult                      `json:"news"`
-	RelatedSearches RelatedSearchesResult           `json:"relatedSearches"`
-	Videos          VideoResult                     `json:"videos"`
+	Type            string                `json:"_type"`
+	Instrumentation BingInstrumentation   `json:"instrumentation"`
+	WebPages        WebpageResult         `json:"webPages"`
+	Images          ImageResult           `json:"images"`
+	News            NewsResult            `json:"news"`
+	RelatedSearches RelatedSearchesResult `json:"relatedSearches"`
+	Videos          VideoResult           `json:"videos"`
 }
 
-type BingSearchResultInstrumentation struct {
+type BingInstrumentation struct {
 	PingUrlBase     string `json:"pingUrlBase"`
 	PageLoadPingUrl string `json:"pageLoadPingUrl"`
 }
@@ -175,57 +168,12 @@ type VideoResultValueThumbnail struct {
 	Height int `json:"height"`
 }
 
-type WebsearchError struct {
-	ErrorResponse struct {
-		StatusCode int    `json:"statusCode"`
-		Message    string `json:"message"`
-	} `json:"error"`
-}
-
-func (we *WebsearchError) Error() string {
-	return we.ErrorResponse.Message
-}
-
-func getResponseError(res *http.Response) error {
-	var webSearchError *WebsearchError
-	err := json.NewDecoder(res.Body).Decode(webSearchError)
-	if err != nil {
-		return err
-	}
-	return webSearchError
-}
-
-func (bsc *BingSearchClient) WebSearch(query string, count int, offset int, mkt string, safesearch string) (*BingSearchResult, error) {
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", bingSearchUrl, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	params := req.URL.Query()
-	params.Add("q", query)
-	params.Add("count", strconv.Itoa(count))
-	params.Add("offset", strconv.Itoa(offset))
-	params.Add("mkt", mkt)
-	params.Add("safesearch", safesearch)
-	req.URL.RawQuery = params.Encode()
-
-	req.Header.Add("Ocp-Apim-Subscription-Key", bsc.SubscriptionKey)
-
-	res, err := client.Do(req)
+func (bsc *BingSearchClient) WebSearch(q string, count int, offset int, mkt string, safeSearch string) (*BingSearchResult, error) {
+	var bingResult *BingSearchResult
+	params := NewSearchQueryParams(q, count, offset, mkt, safeSearch)
+	err := bsc.searchRequest(bingSearchUrl, params, &bingResult)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		return nil, getResponseError(res)
-	}
-
-	var bingResult BingSearchResult
-	err = json.NewDecoder(res.Body).Decode(&bingResult)
-	if err != nil {
-		return nil, err
-	}
-
-	return &bingResult, nil
+	return bingResult, nil
 }
