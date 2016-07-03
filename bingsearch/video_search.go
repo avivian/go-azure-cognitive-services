@@ -2,6 +2,8 @@ package bingsearch
 
 var bingVideoSearchUrl = "https://api.cognitive.microsoft.com/bing/v5.0/videos/search"
 
+type VideoService service
+
 type BingVideoSearchResult struct {
 	Type                   string                 `json:"_type"`
 	Instrumentation        BingInstrumentation    `json:"instrumentation"`
@@ -48,10 +50,10 @@ type VideoCreator struct {
 	Name string `json:"name"`
 }
 
-func (bsc *BingSearchClient) VideoSearch(q string, count int, offset int, mkt string, safeSearch string) (*BingVideoSearchResult, error) {
+func (s *VideoService) Search(q string, count int, offset int, mkt string, safeSearch string) (*BingVideoSearchResult, error) {
 	var result *BingVideoSearchResult
 	params := NewSearchQueryParams(q, count, offset, mkt, safeSearch)
-	err := bsc.searchRequest(bingVideoSearchUrl, params, &result)
+	err := s.client.search(bingVideoSearchUrl, params, &result)
 	if err != nil {
 		return nil, err
 	}

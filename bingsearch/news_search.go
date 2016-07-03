@@ -2,6 +2,8 @@ package bingsearch
 
 var bingNewsSearchUrl = "https://api.cognitive.microsoft.com/bing/v5.0/news/search"
 
+type NewsService service
+
 type BingNewsSearchResult struct {
 	Type                  string              `json:"_type"`
 	Instrumentation       BingInstrumentation `json:"instrumentation"`
@@ -42,10 +44,10 @@ type NewsProvider struct {
 	Name string `json:"name"`
 }
 
-func (bsc *BingSearchClient) NewsSearch(q string, count int, offset int, mkt string, safeSearch string) (*BingNewsSearchResult, error) {
+func (s *NewsService) Search(q string, count int, offset int, mkt string, safeSearch string) (*BingNewsSearchResult, error) {
 	var result *BingNewsSearchResult
 	params := NewSearchQueryParams(q, count, offset, mkt, safeSearch)
-	err := bsc.searchRequest(bingNewsSearchUrl, params, &result)
+	err := s.client.search(bingNewsSearchUrl, params, &result)
 	if err != nil {
 		return nil, err
 	}

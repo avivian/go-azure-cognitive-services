@@ -2,6 +2,8 @@ package bingsearch
 
 var bingImageSearchURL = "https://api.cognitive.microsoft.com/bing/v5.0/images/search"
 
+type ImageService service
+
 type BingImageSearchResult struct {
 	Type                         string                 `json:"_type"`
 	Instrumentation              BingInstrumentation    `json:"instrumentation"`
@@ -38,46 +40,15 @@ type ImageSearchValue struct {
 	AccentColor            string                                 `json:"accentColor"`
 }
 
-type QueryExpansions struct {
-	DisplayText            string               `json:"displayText"`
-	WebSearchUrl           string               `json:"webSearchUrl"`
-	WebSearchUrlPingSuffix string               `json:"webSearchUrlPingSuffix"`
-	SearchLink             string               `json:"searchLink"`
-	Thumbnail              ImageSearchThumbnail `json:"thumbnail"`
-}
-
-type ImageThumbnail struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
 type ImageSearchValueInsightsSourcesSummary struct {
 	ShoppingSourcesCount int `json:"shoppingSourcesCount"`
 	RecipeSourcesCount   int `json:"recipeSourcesCount"`
 }
 
-type PivotSuggestionsList struct {
-	Pivot       string             `json:"pivot"`
-	Suggestions []PivotSuggestions `json:"suggestions"`
-}
-
-type PivotSuggestions struct {
-	Text                   string               `json:"text"`
-	DisplayText            string               `json:"displayText"`
-	WebSearchUrl           string               `json:"webSearchUrl"`
-	WebSearchUrlPingSuffix string               `json:"webSearchUrlPingSuffix"`
-	SearchLink             string               `json:"searchLink"`
-	Thumbnail              ImageSearchThumbnail `json:"thumbnail"`
-}
-
-type ImageSearchThumbnail struct {
-	ThumbnailUrl string `json:"thumbnailUrl"`
-}
-
-func (bsc *BingSearchClient) ImageSearch(q string, count int, offset int, mkt string, safeSearch string) (*BingImageSearchResult, error) {
+func (s *ImageService) Search(q string, count int, offset int, mkt string, safeSearch string) (*BingImageSearchResult, error) {
 	var result *BingImageSearchResult
 	params := NewSearchQueryParams(q, count, offset, mkt, safeSearch)
-	err := bsc.searchRequest(bingImageSearchURL, params, &result)
+	err := s.client.search(bingImageSearchURL, params, &result)
 	if err != nil {
 		return nil, err
 	}

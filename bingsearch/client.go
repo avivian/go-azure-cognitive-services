@@ -1,73 +1,97 @@
 package bingsearch
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
-	"strconv"
 )
 
-type BingSearchClient struct {
-	SubscriptionKey string
-	client          *http.Client
+var (
+	SubscriptionKeyHeader = "Ocp-Apim-Subscription-Key"
+)
+
+type service struct {
+	client *Client
 }
 
-type SearchQueryParams struct {
-	Query      string
-	Count      string
-	Offset     string
-	Mkt        string
-	SafeSearch string
+type Client struct {
+	client http.Client
+
+	common service
+
+	subscriptionKey string
+
+	Web    *WebService
+	Images *ImageService
+	Videos *VideoService
+	News   *NewsService
 }
 
-func NewSearchQueryParams(q string, count int, offset int, mkt string, safeSearch string) *SearchQueryParams {
-	return &SearchQueryParams{
-		Query:      q,
-		Count:      strconv.Itoa(count),
-		Offset:     strconv.Itoa(offset),
-		Mkt:        mkt,
-		SafeSearch: safeSearch,
+func NewClient(subscriptionKey string) *Client {
+
+	c := &Client{
+		client:          *http.DefaultClient,
+		subscriptionKey: subscriptionKey,
 	}
+	c.common.client = c
+
+	c.Web = (*WebService)(&c.common)
+	c.Images = (*ImageService)(&c.common)
+	c.Videos = (*VideoService)(&c.common)
+	c.News = (*NewsService)(&c.common)
+
+	return c
 }
 
-func NewClient(subscriptionKey string) *BingSearchClient {
-	return &BingSearchClient{
-		SubscriptionKey: subscriptionKey,
-		client:          &http.Client{},
+func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
+
+	var buf io.ReadWriter
+	if body != nil {
+		buf := new(bytes.Buffer)
+		err := json.NewEncoder(buf).Encode(body)
+		if err != nil {
+			return nil, err
+		}
 	}
-}
 
-func getSearchRawQuery(req *http.Request, params *SearchQueryParams) string {
-	query := req.URL.Query()
-	query.Add("q", params.Query)
-	query.Add("count", params.Count)
-	query.Add("offset", params.Offset)
-	query.Add("mkt", params.Mkt)
-	query.Add("safeSearch", params.SafeSearch)
-	return query.Encode()
-}
-
-func (bsc *BingSearchClient) searchRequest(url string, params *SearchQueryParams, result interface{}) error {
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(method, urlStr, buf)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	req.URL.RawQuery = getSearchRawQuery(req, params)
-	req.Header.Add("Ocp-Apim-Subscription-Key", bsc.SubscriptionKey)
+	req.Header.Add(SubscriptionKeyHeader, c.subscriptionKey)
+	req.Header.Add("Accept", "application/json")
 
-	res, err := bsc.client.Do(req)
+	return req, nil
+}
+
+func (c *Client) Do(req *http.Request, body interface{}) error {
+	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
-		return getResponseError(res)
-	}
-
-	err = json.NewDecoder(res.Body).Decode(&result)
+	err = json.NewDecoder(res.Body).Decode(&body)
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("%d\n", res.StatusCode)
+
+	// TODO: parse response
 	return nil
+}
+
+func (c *Client) search(urlStr string, params *SearchQueryParams, result interface{}) error {
+	req, err := c.NewRequest("GET", urlStr, nil)
+	if err != nil {
+		return err
+	}
+	req.URL.RawQuery = getSearchRawQuery(req, params)
+	err = c.Do(req, &result)
+	return err
+
 }
